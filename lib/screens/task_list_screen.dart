@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../widgets/task_tile.dart';
 
 class TaskListScreen extends StatefulWidget {
   const TaskListScreen({super.key});
@@ -11,24 +12,25 @@ class TaskListScreen extends StatefulWidget {
 class _TaskListScreenState extends State<TaskListScreen> {
   final TextEditingController _taskController = TextEditingController();
 
-  final CollectionReference _tasksRef = FirebaseFirestore.instance.collection('tasks');
+  final CollectionReference _tasksRef =
+      FirebaseFirestore.instance.collection('tasks');
 
-  // Create 
+
   Future<void> _addTask() async {
     final name = _taskController.text.trim();
     if (name.isEmpty) return;
 
     await _tasksRef.add({
       'name': name,
-      'completed': false,
-      'createdAt': FieldValue.serverTimestamp(),
-      'subtasks': [],
+      'isDone': false,
+      'createdAt': FieldValue.serverTimestamp(), 
+      'subtasks': [],                             
     });
 
-    _taskController.clear();
+    _taskController.clear(); 
   }
 
-  Future<void> _toogleTask(String docId, bool current) async {
+  Future<void> _toggleTask(String docId, bool current) async {
     await _tasksRef.doc(docId).update({'isDone': !current});
   }
 
@@ -85,7 +87,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: _tasksRef.orderBy('createdAt', descending: true).snapshots(),
+              stream: _tasksRef
+                  .orderBy('createdAt', descending: true)
+                  .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -98,7 +102,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                 final docs = snapshot.data!.docs;
 
                 if (docs.isEmpty) {
-                  return const Center(child: Text('No tasks yet!'));
+                  return const Center(child: Text('No tasks yet. Add one!'));
                 }
 
                 return ListView.builder(
@@ -115,17 +119,17 @@ class _TaskListScreenState extends State<TaskListScreen> {
                       onToggle: () => _toggleTask(doc.id, data['isDone']),
                       onDelete: () => _deleteTask(doc.id),
                       onAddSubtask: (title) =>
-                        _addSubtask(doc.id, data['subtasks'] ?? [], title),
+                          _addSubtask(doc.id, data['subtasks'] ?? [], title),
                       onToggleSubtask: (i) =>
-                        _toggleSubtask(doc.id, data['subtasks'] ?? [], i),
+                          _toggleSubtask(doc.id, data['subtasks'] ?? [], i),
                       onDeleteSubtask: (i) =>
-                        _deleteSubtask(doc.id, data['subtasks'] ?? [], i),
+                          _deleteSubtask(doc.id, data['subtasks'] ?? [], i),
                     );
                   },
                 );
               },
             ),
-          )
+          ),
         ],
       ),
     );
