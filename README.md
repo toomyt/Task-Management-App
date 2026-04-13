@@ -38,8 +38,14 @@ Required Dependencies (pubspec.yaml)
 
 ## Enhanced Features
 Feature 1: Swipe-to-delete
-- a swipe-to-delete feature on the task bar that prompts a confirmation message before deletion
+- Tasks can be dismissed by swiping left on any task tile. A confirmation dialog appears before the deletion is committed, preventing accidental data loss. If the user cancels, the tile snaps back into place. The delete operation is wired directly to Firestore, so the task is permanently removed from the cloud on confirmation.
    
 Feature 2: Animation 
-- animation whenever tasks are added or removed
+- Tasks animate in and out of the list using a combination of SizeTransition and FadeTransition, driven by AnimatedList. Rather than using StreamBuilder, the app subscribes to the Firestore stream directly via a StreamSubscription in initState, which allows the diff logic to run once per Firestore event without triggering rebuild loops. New tasks slide and fade in from the top, deleted tasks collapse and fade out in place.
+
+## Known Limitations
+- Firestore test mode rules expire after 30 days, after which all reads and writes return a permission-denied error until the rules are manually updated.
   
+- There is no user authentication, meaning anyone with the Firebase project credentials can read and write all tasks.
+  
+- The app loads the entire tasks collection on startup with no pagination, which will degrade performance and increase Firestore read costs significantly as the number of tasks grows.
