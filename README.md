@@ -1,6 +1,6 @@
 # Task_Management_App
 
-An task management app on Flutter.
+A task management app on Flutter.
 
 ## Getting Started
 
